@@ -13,16 +13,19 @@ An intelligent AI-powered SaaS support agent built with OpenAI GPT-4 and Pydanti
 - **Risk Assessment**: Provides risk level scoring (0-10) for support queries
 - **Database Integration**: SQLAlchemy-based user data management with SQLite
 - **Structured Responses**: Uses Pydantic models for consistent, validated outputs
+- **FastAPI Server**: Built-in web server with interactive API documentation
+- **REST API**: HTTP endpoints for integration with external applications
 
 ## 🏗️ Architecture
 
 The support agent is built using several key components:
 
-- **Agent (`agent.py`)**: Core AI agent using Pydantic-AI framework
-- **Database (`database.py`)**: SQLAlchemy setup for user data persistence
-- **Models (`models.py`)**: User data model definitions
-- **Main (`main.py`)**: Example usage and entry point
-- **Seed (`seed.py`)**: Database seeding with sample users
+- **Agent (`app/agent.py`)**: Core AI agent using Pydantic-AI framework
+- **Database (`app/database.py`)**: SQLAlchemy setup for user data persistence
+- **Models (`app/models.py`)**: User data model definitions
+- **Main (`app/main.py`)**: Example usage and entry point
+- **Config (`app/config.py`)**: Configuration settings and environment management
+- **Seed (`scripts/seed.py`)**: Database seeding with sample users
 
 ## 🚀 Quick Start
 
@@ -57,24 +60,73 @@ The support agent is built using several key components:
 
 4. **Initialize the database**
    ```bash
-   uv run python seed.py
+   uv run python scripts/seed.py
    ```
 
-5. **Test the setup**
+5. **Start the FastAPI server**
    ```bash
-   # Test OpenAI connection
-   uv run python test_openai.py
-   
-   # Run the support agent
-   uv run python main.py
+   # Run the FastAPI server
+   uv run python app/main.py
    ```
+
+   The server will start and be available at:
+   - **Main API**: http://localhost:8000
+   - **Interactive API Documentation**: http://localhost:8000/docs
+   - **Alternative API Documentation**: http://localhost:8000/redoc
+
+6. **Test the API**
+   ```bash
+   # Test a support query via API
+   curl -X POST "http://localhost:8000/support" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "user_id": 3,
+          "message": "My account is not working properly, please help me!"
+        }'
+   ```
+
+## 🌐 API Documentation
+
+When you run the application, a FastAPI server starts automatically on `http://localhost:8000`. You can interact with the API in several ways:
+
+### Interactive Documentation
+- **Swagger UI**: Visit `http://localhost:8000/docs` for an interactive API interface
+- **ReDoc**: Visit `http://localhost:8000/redoc` for alternative documentation
+
+### Available Endpoints
+- `POST /support`: Submit a support query and get AI-powered assistance
+- `GET /health`: Check if the server is running
+- `GET /`: Basic server information
+
+### API Usage Example
+
+```bash
+# Test the support endpoint
+curl -X POST "http://localhost:8000/support" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "user_id": 1,
+       "message": "I need help with my subscription"
+     }'
+```
+
+### Response Format
+
+```json
+{
+  "support_advice": "I can help you with your subscription...",
+  "escalation_required": false,
+  "risk_level": 3,
+  "user_name": "Alice"
+}
+```
 
 ## 📋 Usage Examples
 
 ### Basic Support Query
 
 ```python
-from agent import Dataconnection, SupportDependencies, support_agent
+from app.agent import Dataconnection, SupportDependencies, support_agent
 
 # Create dependencies
 deps = SupportDependencies(
@@ -158,7 +210,7 @@ uv pip install -e .
 
 ### Model Configuration
 
-The agent is configured to use GPT-4o by default. You can modify the model in `agent.py`:
+The agent is configured to use GPT-4o by default. You can modify the model in `app/agent.py`:
 
 ```python
 model = OpenAIModel(
@@ -179,44 +231,37 @@ The support agent has access to several tools:
 
 ```
 SupportAgent/
-├── agent.py              # Main AI agent implementation
-├── database.py           # Database configuration
-├── models.py             # SQLAlchemy models
-├── main.py               # Example usage
-├── seed.py               # Database seeding
-├── test_openai.py        # OpenAI connection testing
-├── pyproject.toml        # Project configuration
+├── app/                   # Main application package
+│   ├── __init__.py       # Package initialization
+│   ├── agent.py          # Main AI agent implementation
+│   ├── config.py         # Configuration settings
+│   ├── database.py       # Database configuration
+│   ├── main.py           # Example usage and entry point
+│   └── models.py         # SQLAlchemy models
+├── data/                  # Data storage
+│   └── support.db        # SQLite database
+├── scripts/               # Utility scripts
+│   └── seed.py           # Database seeding script
+├── pyproject.toml        # Project configuration and dependencies
 ├── uv.lock               # UV lockfile for reproducible builds
-├── support.db            # SQLite database
-├── .env                  # Environment variables
+├── .env                  # Environment variables (create this file)
 ├── .gitignore            # Git ignore rules
-└── README.md             # This file
+└── README.md             # This documentation
 ```
 
 ## 🔍 Testing
 
-### Test OpenAI Connection
-
-```bash
-uv run python test_openai.py
-```
-
-This will verify:
-- API key is properly loaded
-- Connection to OpenAI is working
-- Basic completion functionality
-
 ### Run Support Agent
 
 ```bash
-uv run python main.py
+uv run python app/main.py
 ```
 
 ## 🚀 Advanced Usage
 
 ### Custom Support Scenarios
 
-You can test different support scenarios by modifying the query in `main.py`:
+You can test different support scenarios by modifying the query in `app/main.py`:
 
 ```python
 # Billing inquiry
@@ -242,7 +287,7 @@ result = support_agent.run_sync(
 
 To add new tools or capabilities:
 
-1. **Add new tools** in `agent.py`:
+1. **Add new tools** in `app/agent.py`:
 ```python
 @support_agent.tool
 async def check_billing_history(ctx: RunContext[SupportDependencies]) -> str:
@@ -250,7 +295,7 @@ async def check_billing_history(ctx: RunContext[SupportDependencies]) -> str:
     pass
 ```
 
-2. **Extend the database model** in `models.py`:
+2. **Extend the database model** in `app/models.py`:
 ```python
 class User(Base):
     # ...existing fields...
@@ -283,7 +328,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 If you have questions or need help:
 - Open an issue on GitHub
 - Check the existing documentation
-- Review the example usage in `main.py`
+- Review the example usage in `app/main.py`
 
 ---
 

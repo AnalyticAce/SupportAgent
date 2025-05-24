@@ -5,9 +5,12 @@ description = "An intelligent AI-powered SaaS support agent using OpenAI GPT-4 a
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "fastapi[standard]>=0.115.12",
     "openai>=1.82.0",
     "pydantic>=2.11.5",
     "pydantic-ai>=0.2.6",
     "python-dotenv>=1.1.0",
+    "requests>=2.32.3",
     "sqlalchemy>=2.0.41",
+    "uvicorn>=0.34.2",
 ]

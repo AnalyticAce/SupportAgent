@@ -7,14 +7,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
-from dotenv import load_dotenv
-
-load_dotenv()
-
-
-api_key = os.getenv('OPENAI_API_KEY')
-if not api_key:
-   raise ValueError("OPENAI_API_KEY environment variable is not set")
+from config import settings
 
 
 @contextmanager
@@ -68,8 +61,8 @@ class SupportResult(BaseModel):
 
 
 model = OpenAIModel(
-   'gpt-4o',
-   provider=OpenAIProvider(api_key=api_key)
+   model_name=settings.openai_model,
+   provider=OpenAIProvider(api_key=settings.openai_api_key),
 )
 
 support_agent = Agent(
