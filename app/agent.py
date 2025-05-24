@@ -4,12 +4,16 @@ from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from app.config import settings
-from app.database import DataconnectionUser
+from app.database import DataconnectionUser, DataconnectionFaq
+from openai import AsyncOpenAI
+
+embedding_client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 @dataclass
 class SupportDependencies:
    user_id: int
    db: DataconnectionUser
+   faqdb: DataconnectionFaq = None
 
 
 class SupportResult(BaseModel):
@@ -23,6 +27,7 @@ model = OpenAIModel(
    provider=OpenAIProvider(api_key=settings.openai_api_key),
 )
 
+
 support_agent = Agent(
    model=model,
    deps_type=SupportDependencies,
@@ -34,11 +39,24 @@ support_agent = Agent(
    retries=2
 )
 
+async def generate_embedding(text: str) -> list[float]:
+   response = await embedding_client.embeddings.create(
+      model=settings.openai_embedding_model_name, input=text
+   )
+   return response.data[0].embedding
 
 @support_agent.system_prompt
 async def add_user_name(ctx: RunContext[SupportDependencies]) -> str:
    user_name = await ctx.deps.db.user_name(ctx.deps.user_id)
    return f"User name is {user_name!r}.\n\n"
+
+
+# @support_agent.system_prompt
+# async def add_faq_context(ctx: RunContext[SupportDependencies]) -> str:
+#    sample_query = "billing issue"
+#    embedding = await generate_embedding(sample_query)
+#    rows = await ctx.deps.faqdb.search_by_embedding(embedding)
+#    return "Context from FAQ Database:\n\n" + format_faq_results(rows)
 
 
 @support_agent.tool
@@ -51,3 +69,17 @@ async def check_account_status(ctx: RunContext[SupportDependencies]) -> str:
 async def check_subscription_plan(ctx: RunContext[SupportDependencies]) -> str:
    subscription_plan = await ctx.deps.db.subscription_plan(ctx.deps.user_id)
    return f"User subscription plan is {subscription_plan!r}.\n\n"
+
+
+def format_faq_results(rows) -> str:
+   return "\n\n".join(
+      f"## {row['question']}\nCategory: {row['category']}\n\n{row['answer']}"
+      for row in rows
+   )
+
+
+@support_agent.tool
+async def faq_search(ctx: RunContext[SupportDependencies], query: str) -> str:
+   embedding = await generate_embedding(query)
+   rows = await ctx.deps.faqdb.search_by_embedding(embedding)
+   return format_faq_results(rows)

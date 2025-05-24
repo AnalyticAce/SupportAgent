@@ -27,9 +27,11 @@ class Faq(Base):
     question = Column(String, nullable=False)
     answer = Column(String, nullable=False)
     category = Column(String, nullable=True)  # e.g., 'billing', 'technical', 'general'
+    embedding = Column(String, nullable=True)
     
     def __repr__(self):
-        return f"<FAQ(question={self.question}, answer={self.answer}, category={self.category})>"
+        return f"<FAQ(question={self.question}, answer={self.answer}, category={self.category}, embedding={self.embedding})>"
+
 
 @contextmanager
 def get_session():
@@ -91,14 +93,14 @@ class DataconnectionFaq:
                 return None
     
     @classmethod
-    async def add_faq(cls, question: str, answer: str, category: str = None):
+    async def add_faq(cls, question: str, answer: str, category: str = None, embedding: list[float] = None):
+        # embedding = await generate_embedding(f"{question}\n{answer}")
         with get_session() as session:
-            new_faq = Faq(question=question, answer=answer, category=category)
+            new_faq = Faq(question=question, answer=answer, category=category, embedding=str(embedding) if embedding else None)
             session.add(new_faq)
             session.commit()
-            session.refresh(new_faq)
             return {"id": new_faq.id, "question": new_faq.question, "answer": new_faq.answer, "category": new_faq.category}
-    
+
     @classmethod
     async def update_faq(cls, faq_id: int, question: str = None, answer: str = None, category: str = None):
         with get_session() as session:
@@ -126,3 +128,15 @@ class DataconnectionFaq:
                 return {"message": "FAQ deleted successfully"}
             else:
                 return {"message": "FAQ not found"}
+
+    @classmethod
+    async def search_by_embedding(cls, query_embedding: list[float]):
+        with get_session() as session:
+            sql = """
+            SELECT question, answer, category
+            FROM faqs
+            ORDER BY embedding <-> :embedding
+            LIMIT 5
+            """
+            result = session.execute(sql, {"embedding": query_embedding})
+            return [{"question": r["question"], "answer": r["answer"], "category": r["category"]} for r in result]

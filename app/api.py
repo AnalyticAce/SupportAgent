@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import APIRouter, HTTPException
-from app.agent import support_agent, SupportDependencies
+from app.agent import support_agent, SupportDependencies, generate_embedding
 from app.database import DataconnectionFaq, DataconnectionUser
 from app.models import (
     QueryRequest,
@@ -29,10 +29,11 @@ async def query_support_agent(request: QueryRequest):
     try:
         deps = SupportDependencies(
             user_id=request.user_id,
-            db=DataconnectionUser()
+            db=DataconnectionUser(),
+            faqdb=DataconnectionFaq()
         )
 
-        result = asyncio.run(support_agent.run(request.query, deps=deps))
+        result = await support_agent.run(request.query, deps=deps)
         
         if not result or not result.output:
             raise HTTPException(status_code=500, detail="No response from support agent")
@@ -78,7 +79,8 @@ async def get_faq_by_category(category: str):
 @faq_router.post("/", response_model=FaqCreateRequest)
 async def create_faq(faq: FaqCreateRequest):
     try:
-        await DataconnectionFaq.add_faq(faq.question, faq.answer, faq.category)
+        embedding = await generate_embedding(f"{faq.question}\n{faq.answer}")
+        await DataconnectionFaq.add_faq(faq.question, faq.answer, faq.category, embedding)
         return FaqCreateRequest(
             question=faq.question,
             answer=faq.answer,
