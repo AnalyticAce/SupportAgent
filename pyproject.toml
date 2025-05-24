@@ -1,0 +1,13 @@
+[project]
+name = "supportagent"
+version = "0.1.0"
+description = "An intelligent AI-powered SaaS support agent using OpenAI GPT-4 and Pydantic-AI to provide automated customer support with account status checking, subscription management, and escalation handling."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "openai>=1.82.0",
+    "pydantic>=2.11.5",
+    "pydantic-ai>=0.2.6",
+    "python-dotenv>=1.1.0",
+    "sqlalchemy>=2.0.41",
+]
