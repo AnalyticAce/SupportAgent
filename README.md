@@ -2,7 +2,8 @@
 
 An intelligent AI-powered SaaS support agent built with OpenAI GPT-4 and Pydantic-AI. This project demonstrates how to create an automated customer support system that can handle user queries, check account statuses, manage subscriptions, and determine when to escalate issues to human administrators.
 
-> **Note**: This is a simple implementation designed to serve as a foundation that can evolve with multiple features. The current version provides basic functionality for AI-powered support, with an extensible architecture that allows for easy addition of new capabilities, tools, and integrations as your support requirements grow.
+> [!NOTE]
+> This is a simple implementation designed to serve as a foundation that can evolve >with multiple features. The current version provides basic functionality for AI-powered >support, with an extensible architecture that allows for easy addition of new capabilities, >tools, and integrations as your support requirements grow.
 
 ## 🌟 Features
 
