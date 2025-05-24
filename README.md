@@ -70,14 +70,14 @@ The support agent is built using several key components:
    ```
 
    The server will start and be available at:
-   - **Main API**: http://localhost:8000
-   - **Interactive API Documentation**: http://localhost:8000/docs
-   - **Alternative API Documentation**: http://localhost:8000/redoc
+   - **Main API**: http://localhost:8080
+   - **Interactive API Documentation**: http://localhost:8080/docs
+   - **Alternative API Documentation**: http://localhost:8080/redoc
 
 6. **Test the API**
    ```bash
    # Test a support query via API
-   curl -X POST "http://localhost:8000/support" \
+   curl -X POST "http://localhost:8080/support" \
         -H "Content-Type: application/json" \
         -d '{
           "user_id": 3,
@@ -87,11 +87,11 @@ The support agent is built using several key components:
 
 ## 🌐 API Documentation
 
-When you run the application, a FastAPI server starts automatically on `http://localhost:8000`. You can interact with the API in several ways:
+When you run the application, a FastAPI server starts automatically on `http://localhost:8080`. You can interact with the API in several ways:
 
 ### Interactive Documentation
-- **Swagger UI**: Visit `http://localhost:8000/docs` for an interactive API interface
-- **ReDoc**: Visit `http://localhost:8000/redoc` for alternative documentation
+- **Swagger UI**: Visit `http://localhost:8080/docs` for an interactive API interface
+- **ReDoc**: Visit `http://localhost:8080/redoc` for alternative documentation
 
 ### Available Endpoints
 - `POST /support`: Submit a support query and get AI-powered assistance
@@ -102,7 +102,7 @@ When you run the application, a FastAPI server starts automatically on `http://l
 
 ```bash
 # Test the support endpoint
-curl -X POST "http://localhost:8000/support" \
+curl -X POST "http://localhost:8080/agent/query" \
      -H "Content-Type: application/json" \
      -d '{
        "user_id": 1,
@@ -156,17 +156,27 @@ Risk Level: 7
 
 ## 🗃️ Database Schema
 
-The system uses a simple SQLite database with the following user structure:
+The system uses a simple SQLite database with the following structures:
 
-```sql
-CREATE TABLE users (
-    user_id INTEGER PRIMARY KEY,
-    name VARCHAR NOT NULL,
-    email VARCHAR UNIQUE NOT NULL,
-    account_status VARCHAR NOT NULL,  -- 'active', 'inactive', 'suspended'
-    subscription_plan VARCHAR NOT NULL  -- 'free', 'basic', 'premium', 'enterprise'
-);
-```
+1. Users Table
+    ```sql
+    CREATE TABLE users (
+        user_id INTEGER PRIMARY KEY,
+        name VARCHAR NOT NULL,
+        email VARCHAR UNIQUE NOT NULL,
+        account_status VARCHAR NOT NULL,  -- 'active', 'inactive', 'suspended'
+        subscription_plan VARCHAR NOT NULL  -- 'free', 'basic', 'premium', 'enterprise'
+    );
+    ```
+2. FAQs Table
+    ```sql
+    CREATE TABLE faqs (
+        id INTEGER PRIMARY KEY,
+        question TEXT NOT NULL,
+        answer TEXT NOT NULL,
+        category VARCHAR NOT NULL  -- 'billing', 'technical', 'account'
+    );
+    ```
 
 ### Sample Data
 
@@ -234,13 +244,14 @@ SupportAgent/
 ├── app/                   # Main application package
 │   ├── __init__.py       # Package initialization
 │   ├── agent.py          # Main AI agent implementation
+│   ├── api.py            # FastAPI API endpoints
 │   ├── config.py         # Configuration settings
-│   ├── database.py       # Database configuration
+│   ├── database.py       # Database configuration and SQLAlchemy models
 │   ├── main.py           # Example usage and entry point
-│   └── models.py         # SQLAlchemy models
-├── data/                  # Data storage
+│   └── models.py         # FastAPI models and Pydantic schemas
+├── data/                 # Data storage
 │   └── support.db        # SQLite database
-├── scripts/               # Utility scripts
+├── scripts/              # Utility scripts
 │   └── seed.py           # Database seeding script
 ├── pyproject.toml        # Project configuration and dependencies
 ├── uv.lock               # UV lockfile for reproducible builds

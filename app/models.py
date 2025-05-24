@@ -1,11 +1,18 @@
-from sqlalchemy import Column, Integer, String
-from database import Base
+from pydantic import BaseModel
 
-class User(Base):
-    __tablename__ = "users"
+class QueryRequest(BaseModel):
+    user_id: int
+    query: str
+
+class QueryResponse(BaseModel):
+    user_id: int
+    query: str
+    support_advice: str
+    escalation_required: bool
+    risk_level: int
     
-    user_id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    account_status = Column(String, nullable=False)  # e.g., 'active', 'inactive', 'suspended'
-    subscription_plan = Column(String, nullable=False)  # e.g., 'free', 'basic', 'premium', "enterprise"
+
+class FaqCreateRequest(BaseModel):
+    question: str
+    answer: str
+    category: str

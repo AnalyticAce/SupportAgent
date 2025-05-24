@@ -1,57 +1,15 @@
-import os
 from dataclasses import dataclass
-from database import SessionLocal
-from models import User
-from contextlib import contextmanager
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
-from config import settings
-
-
-@contextmanager
-def get_session():
-   session = SessionLocal()
-   try:
-      yield session
-   finally:
-      session.close()
-
-
-class Dataconnection:
-   @classmethod
-   async def user_name(cls, user_id: int) -> str:
-      with get_session() as session:
-         user = session.query(User).filter(User.user_id == user_id).first()
-         if user:
-            return user.name
-         else:
-            return "User not found"
-      
-   @classmethod
-   async def account_status(cls, user_id: int) -> str:
-      with get_session() as session:
-         user = session.query(User).filter(User.user_id == user_id).first()
-         if user:
-            return user.account_status
-         else:
-            return "User not found"
-   
-   @classmethod
-   async def subscription_plan(cls, user_id: int) -> str:
-      with get_session() as session:
-         user = session.query(User).filter(User.user_id == user_id).first()
-         if user:
-            return user.subscription_plan
-         else:
-            return "User not found"
-
+from app.config import settings
+from app.database import DataconnectionUser
 
 @dataclass
 class SupportDependencies:
    user_id: int
-   db: Dataconnection
+   db: DataconnectionUser
 
 
 class SupportResult(BaseModel):
@@ -72,7 +30,8 @@ support_agent = Agent(
    system_prompt=(
       "Your are a SaaS support agent. Help users with their account,"
       "check subscription plans, account status and user query to check if it needs to be escalated to an admin."
-   )
+   ),
+   retries=2
 )
 
 

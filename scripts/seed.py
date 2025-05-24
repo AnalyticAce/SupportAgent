@@ -1,5 +1,4 @@
-from app.models import User
-from app.database import SessionLocal, engine, Base
+from app.database import SessionLocal, engine, Base, User, Faq
 
 Base.metadata.create_all(bind=engine)
 
@@ -15,6 +14,16 @@ def seed_database():
         session.add_all(users)
         session.commit()
         print('Database seeded successfully.')
+    elif not session.query(Faq).first():
+        faqs = [
+            Faq(id=1, question="How do I reset my password?", answer="You can reset your password by going to the settings page and clicking on 'Reset Password'.", category="general"),
+            Faq(id=2, question="What is the refund policy?", answer="We offer a 30-day money-back guarantee for all subscription plans.", category="billing"),
+            Faq(id=3, question="How do I upgrade my subscription?", answer="You can upgrade your subscription from the billing section in your account settings.", category="billing"),
+            Faq(id=4, question="What should I do if I encounter a technical issue?", answer="Please contact our support team via email or through the support portal.", category="technical")
+        ]
+        session.add_all(faqs)
+        session.commit()
+        print('FAQs seeded successfully.')
     else:
         print('Database already seeded.')
     
