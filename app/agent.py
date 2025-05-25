@@ -87,9 +87,7 @@ def format_faq_results(rows) -> str:
 
 
 @support_agent.tool
-async def faq_search(ctx: RunContext[SupportDependencies], query: str, top_k=3) -> str:
-   print(f"Calling FAQ search with query: {query}")
+async def faq_search(ctx: RunContext[SupportDependencies], query: str, top_k=2) -> str:
    embedding = await generate_embedding(query)
    rows = await ctx.deps.faqdb.search_by_embedding(embedding, limit=top_k)
-   print(format_faq_results(rows))
    return format_faq_results(rows)
