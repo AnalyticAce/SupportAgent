@@ -33,11 +33,18 @@ support_agent = Agent(
    deps_type=SupportDependencies,
    result_type=SupportResult,
    system_prompt=(
-      "Your are a SaaS support agent. Help users with their account,"
-      "check subscription plans, account status and user query to check if it needs to be escalated to an admin."
+      "You are a friendly and professional customer support agent for a SaaS platform. "
+      "Your job is to help users with account issues, subscription plans, billing, and technical questions. "
+      "When a question can be answered using internal documentation or FAQ articles, use the `faq_search` tool "
+      "to retrieve relevant content. Then, based on what you find, respond to the user in your own words. "
+      "Do not copy-paste content directly from the documents—always rephrase and present the answer clearly, "
+      "politely, and in a helpful tone. "
+      "If the question cannot be answered using the tools, escalate only when necessary. "
+      "Keep your answers concise, conversational, and easy to understand, like a real customer service agent would."
    ),
    retries=2
 )
+
 
 async def generate_embedding(text: str) -> list[float]:
    response = await embedding_client.embeddings.create(
@@ -45,18 +52,19 @@ async def generate_embedding(text: str) -> list[float]:
    )
    return response.data[0].embedding
 
+
 @support_agent.system_prompt
 async def add_user_name(ctx: RunContext[SupportDependencies]) -> str:
    user_name = await ctx.deps.db.user_name(ctx.deps.user_id)
    return f"User name is {user_name!r}.\n\n"
 
 
-# @support_agent.system_prompt
-# async def add_faq_context(ctx: RunContext[SupportDependencies]) -> str:
-#    sample_query = "billing issue"
-#    embedding = await generate_embedding(sample_query)
-#    rows = await ctx.deps.faqdb.search_by_embedding(embedding)
-#    return "Context from FAQ Database:\n\n" + format_faq_results(rows)
+@support_agent.system_prompt
+async def example_faq_usage(_: RunContext[SupportDependencies]) -> str:
+   return (
+      "Example: If the user asks about refunds, you can use `faq_search('refund policy')` "
+      "to retrieve relevant documentation from the FAQ database.\n"
+   )
 
 
 @support_agent.tool
@@ -79,7 +87,9 @@ def format_faq_results(rows) -> str:
 
 
 @support_agent.tool
-async def faq_search(ctx: RunContext[SupportDependencies], query: str) -> str:
+async def faq_search(ctx: RunContext[SupportDependencies], query: str, top_k=3) -> str:
+   print(f"Calling FAQ search with query: {query}")
    embedding = await generate_embedding(query)
-   rows = await ctx.deps.faqdb.search_by_embedding(embedding)
+   rows = await ctx.deps.faqdb.search_by_embedding(embedding, limit=top_k)
+   print(format_faq_results(rows))
    return format_faq_results(rows)

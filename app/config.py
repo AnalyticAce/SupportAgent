@@ -26,7 +26,17 @@ class Settings(BaseSettings):
     openai_api_key: str = 'your-default-api-key'
     openai_model: str = 'gpt-3.5-turbo'
     openai_embedding_model_name: str = 'text-embedding-3-small'
-    database_url: str = f"sqlite:///{get_data_dir() / 'support.db'}"
+    
+    # PostgreSQL configuration
+    postgres_host: str = 'localhost'
+    postgres_port: int = 5432
+    postgres_user: str = 'supportagent'
+    postgres_password: str = 'password'
+    postgres_db: str = 'supportagent'
+    
+    @property
+    def database_url(self) -> str:
+        return f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
     
     model_config = SettingsConfigDict(
         env_file=".env",
