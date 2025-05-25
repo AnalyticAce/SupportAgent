@@ -24,7 +24,29 @@ agent_router = APIRouter(
 @agent_router.post("/query", response_model=QueryResponse)
 async def query_support_agent(request: QueryRequest):
     """
-    Query the support agent with a user question and get structured response
+🤖 **AI-Powered Support Query with RAG**
+
+Submit a customer support query to the intelligent AI agent and receive a structured response 
+with personalized advice, escalation recommendations, and risk assessment.
+
+**Features:**
+- **RAG Implementation**: Uses semantic search through vectorized FAQ database
+- **Account-Aware**: Automatically checks user account status and subscription
+- **Smart Escalation**: AI determines when human intervention is needed
+- **Risk Scoring**: Provides 0-10 risk level for prioritization
+- **Personalized**: Tailors responses based on user subscription tier
+
+**Example Queries:**
+- "What is your refund policy?"
+- "I can't access my account"
+- "How do I upgrade my subscription?"
+- "The application keeps crashing"
+
+**Response includes:**
+- Intelligent support advice using RAG
+- Boolean escalation recommendation
+- Risk level scoring (0=low, 10=critical)
+- Original query and user ID for tracking
     """
     try:
         deps = SupportDependencies(
