@@ -19,6 +19,67 @@ An intelligent AI-powered SaaS support agent built with OpenAI GPT-4 and Pydanti
 - **FastAPI Server**: Built-in web server with interactive API documentation
 - **REST API**: Comprehensive HTTP endpoints for agent queries and FAQ management
 
+## 🎮 Interactive Demo
+
+Experience the SupportAgent AI in action with our modern, interactive chatbot demo! The demo showcases all the AI capabilities in a beautiful, responsive web interface.
+
+### 🌟 Demo Features
+
+<div align="center">
+  <img src=".github/assets/demo3.png" alt="SupportAgent Demo Interface" width="800" style="border-radius: 10px; margin: 20px 0;"/>
+  <p><em>Modern chatbot interface with real-time AI responses</em></p>
+</div>
+
+- **🤖 AI-Powered Conversations**: Real-time chat with intelligent responses
+- **📱 Responsive Design**: Works perfectly on desktop, tablet, and mobile
+- **⚡ Live API Integration**: Connects to your SupportAgent API when running
+- **🎯 Smart Fallback**: Intelligent mock responses when API is offline
+- **📊 Real-time Analytics**: Message tracking and response time monitoring
+- **🎨 Modern UI/UX**: Smooth animations, typing indicators, and toast notifications
+
+### 🚀 AI Capabilities Showcase
+
+<div align="center">
+  <img src=".github/assets/demo.png" alt="AI Features Demo" width="800" style="border-radius: 10px; margin: 20px 0;"/>
+  <p><em>Complete AI features including escalation detection and risk assessment</em></p>
+</div>
+
+<div align="center">
+  <img src=".github/assets/demo1.png" alt="AI Features Demo" width="800" style="border-radius: 10px; margin: 20px 0;"/>
+</div>
+
+**Try these example conversations:**
+- 💬 "I forgot my password" - See account recovery flow
+- 💳 "Cancel my subscription" - Experience billing management  
+- 🔒 "My account is locked" - Test security protocols
+- 🆘 "This is urgent!" - Watch escalation detection
+
+### 🎯 Quick Demo Start
+
+1. **Start the SupportAgent API** (optional - demo works without it):
+   ```bash
+   cd SupportAgent
+   uv run python -m uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+   ```
+
+2. **Launch the Demo**:
+   ```bash
+   cd demo
+   python -m http.server 8000
+   # Visit: http://localhost:8000
+   ```
+
+3. **Or open directly**: Simply double-click `demo/index.html` in your browser!
+
+### 🎪 Special Features
+
+- **🎮 Easter Egg**: Try the Konami code (↑↑↓↓←→←→BA) for a surprise!
+- **🎤 Voice Demo**: Click the microphone for simulated voice input
+- **📎 File Upload**: Preview of future file attachment capabilities
+- **⚡ Quick Examples**: One-click common support scenarios
+
+> **💡 Pro Tip**: The demo intelligently categorizes your messages and provides contextually appropriate responses, showcasing the real AI's natural language understanding capabilities!
+
 ## 🏗️ Architecture
 
 The support agent is built using several key components with advanced RAG capabilities:
