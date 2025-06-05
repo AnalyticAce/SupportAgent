@@ -33,10 +33,6 @@ An intelligent support agent built with **OpenAI GPT-4** and **RAG (Retrieval-Au
 - Dynamic FAQ management and search
 - Intelligent escalation routing
 - Multi-tier subscription support
-
----
-
-*Built with modern AI technologies for intelligent customer support automation.*
 """
 
 
@@ -67,6 +63,7 @@ app = FastAPI(
         },
     ]
 )
+
 
 @app.get("/", tags=["System"])
 async def root():
