@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SupportAgent 🤖 - AI Demo</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <i class="fas fa-robot"></i>
+                        <span>SupportAgent</span>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>AI Online</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-secondary" onclick="clearChat()">
+                        <i class="fas fa-trash"></i>
+                        Clear Chat
+                    </button>
+                    <button class="btn-primary" onclick="showApiDocs()">
+                        <i class="fas fa-code"></i>
+                        API Docs
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-lightbulb"></i> Quick Examples</h3>
+                    <div class="example-buttons">
+                        <button class="example-btn" onclick="sendExample('How do I reset my password?')">
+                            <i class="fas fa-key"></i>
+                            Password Reset
+                        </button>
+                        <button class="example-btn" onclick="sendExample('What are the available subscription plans?')">
+                            <i class="fas fa-crown"></i>
+                            Subscription Plans
+                        </button>
+                        <button class="example-btn" onclick="sendExample('I cannot access my account')">
+                            <i class="fas fa-user-lock"></i>
+                            Account Issues
+                        </button>
+                        <button class="example-btn" onclick="sendExample('How do I cancel my subscription?')">
+                            <i class="fas fa-times-circle"></i>
+                            Cancel Subscription
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-cogs"></i> AI Features</h3>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <i class="fas fa-brain"></i>
+                            <div>
+                                <strong>GPT-4 Powered</strong>
+                                <p>Advanced language understanding</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-search"></i>
+                            <div>
+                                <strong>RAG Search</strong>
+                                <p>Vector-based FAQ matching</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <strong>Smart Escalation</strong>
+                                <p>Risk assessment & routing</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-chart-line"></i> Stats</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="messageCount">0</div>
+                            <div class="stat-label">Messages</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="responseTime">~1.2s</div>
+                            <div class="stat-label">Avg Response</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Chat Area -->
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-title">
+                        <h2>AI Support Chat</h2>
+                        <p>Ask me anything about your account, subscriptions, or technical issues</p>
+                    </div>
+                    <div class="typing-indicator" id="typingIndicator">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span>AI is thinking...</span>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message welcome-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="sender-name">SupportAgent AI</span>
+                                <span class="message-time">Now</span>
+                            </div>
+                            <div class="message-text">
+                                <h3>👋 Welcome to SupportAgent!</h3>
+                                <p>I'm your AI-powered support assistant. I can help you with:</p>
+                                <ul>
+                                    <li>Account and subscription questions</li>
+                                    <li>Technical support issues</li>
+                                    <li>Password resets and security</li>
+                                    <li>Billing and payment inquiries</li>
+                                </ul>
+                                <p>Try asking me something or use the quick examples on the left! 🚀</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <input 
+                            type="text" 
+                            id="messageInput" 
+                            placeholder="Type your message here... (e.g., 'How do I reset my password?')"
+                            onkeypress="handleKeyPress(event)"
+                        >
+                        <button id="sendButton" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="input-actions">
+                        <button class="action-btn" onclick="toggleMicrophone()" id="micButton">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="action-btn" onclick="attachFile()">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="action-btn" onclick="toggleEmoji()">
+                            <i class="fas fa-smile"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Connecting to AI...</p>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
