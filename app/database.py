@@ -12,6 +12,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 class User(Base):
+    """User model for managing user accounts and subscription details."""
+    
     __tablename__ = "users"
     
     user_id = Column(Integer, primary_key=True, index=True)
@@ -22,6 +24,8 @@ class User(Base):
 
 
 class Faq(Base):
+    """FAQ model for managing frequently asked questions and their answers."""
+    
     __tablename__ = "faqs"
     
     id = Column(Integer, primary_key=True, index=True)
@@ -39,24 +43,23 @@ def ensure_tables_exist():
     Ensure all database tables exist. Create them if they don't.
     This function is called automatically when getting a database session.
     """
+    
     try:
-        # Check if pgvector extension is available
         with engine.connect() as conn:
             result = conn.execute(text("SELECT 1 FROM pg_extension WHERE extname = 'vector'"))
             if not result.fetchone():
                 print("Warning: pgvector extension not found. Vector operations may not work.")
-        
-        # Create all tables defined in the models
+
         Base.metadata.create_all(bind=engine)
         print("Database tables ensured successfully.")
     except Exception as e:
         print(f"Warning: Could not create tables: {e}")
-        # Don't raise the exception to avoid breaking the application
-        # Just log it for debugging purposes
+
 
 @contextmanager
 def get_session():
-    # Ensure tables exist before any database operation
+    """Context manager to get a database session."""
+    
     ensure_tables_exist()
     session = SessionLocal()
     try:
@@ -66,8 +69,12 @@ def get_session():
 
 
 class DataconnectionUser:
+    """Class for managing user account operations."""
+    
     @classmethod
     async def user_name(cls, user_id: int) -> str:
+        """Retrieve the user's name based on their user ID."""
+        
         with get_session() as session:
             user = session.query(User).filter(User.user_id == user_id).first()
             if user:
@@ -77,6 +84,8 @@ class DataconnectionUser:
 
     @classmethod
     async def account_status(cls, user_id: int) -> str:
+        """Retrieve the user's account status based on their user ID."""
+        
         with get_session() as session:
             user = session.query(User).filter(User.user_id == user_id).first()
             if user:
@@ -86,6 +95,8 @@ class DataconnectionUser:
 
     @classmethod
     async def subscription_plan(cls, user_id: int) -> str:
+        """Retrieve the user's subscription plan based on their user ID."""
+        
         with get_session() as session:
             user = session.query(User).filter(User.user_id == user_id).first()
             if user:
@@ -94,20 +105,28 @@ class DataconnectionUser:
                 return "User not found"
 
 class DataconnectionFaq:
+    """Class for managing FAQ operations."""
+    
     @classmethod
     async def get_faqs(cls):
+        """Retrieve all FAQs from the database."""
+        
         with get_session() as session:
             faqs = session.query(Faq).all()
             return [{"question": faq.question, "answer": faq.answer, "category": faq.category} for faq in faqs]
     
     @classmethod
     async def get_faq_by_category(cls, category: str):
+        """Retrieve FAQs by category."""
+        
         with get_session() as session:
             faqs = session.query(Faq).filter(Faq.category == category).all()
             return [{"question": faq.question, "answer": faq.answer} for faq in faqs]
     
     @classmethod
     async def get_faq_by_id(cls, faq_id: int):
+        """Retrieve a specific FAQ by its ID."""
+        
         with get_session() as session:
             faq = session.query(Faq).filter(Faq.id == faq_id).first()
             if faq:
@@ -117,6 +136,8 @@ class DataconnectionFaq:
     
     @classmethod
     async def add_faq(cls, question: str, answer: str, category: str = None, embedding: list[float] = None):
+        """Add a new FAQ to the database."""
+        
         with get_session() as session:
             new_faq = Faq(question=question, answer=answer, category=category, embedding=embedding)
             session.add(new_faq)
@@ -125,6 +146,8 @@ class DataconnectionFaq:
 
     @classmethod
     async def update_faq(cls, faq_id: int, question: str = None, answer: str = None, category: str = None):
+        """Update an existing FAQ in the database."""
+        
         with get_session() as session:
             faq = session.query(Faq).filter(Faq.id == faq_id).first()
             if faq:
@@ -142,6 +165,8 @@ class DataconnectionFaq:
     
     @classmethod
     async def delete_faq(cls, faq_id: int):
+        """Delete an FAQ from the database by its ID."""
+        
         with get_session() as session:
             faq = session.query(Faq).filter(Faq.id == faq_id).first()
             if faq:
@@ -156,6 +181,7 @@ class DataconnectionFaq:
         """
         Search FAQs using vector similarity with pgvector extension
         """
+        
         with get_session() as session:
             # Convert list to string format for PostgreSQL vector casting
             embedding_str = '[' + ','.join(map(str, query_embedding)) + ']'

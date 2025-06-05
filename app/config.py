@@ -5,6 +5,7 @@ from pathlib import Path
 
 def get_project_root() -> Path:
     """Get the project root directory by looking for pyproject.toml"""
+    
     current_path = Path(__file__).resolve()
     
     for parent in [current_path] + list(current_path.parents):
@@ -16,12 +17,14 @@ def get_project_root() -> Path:
 
 def get_data_dir() -> Path:
     """Get the data directory and ensure it exists"""
+    
     data_dir = get_project_root() / "data"
     data_dir.mkdir(exist_ok=True)
     return data_dir
 
 
 class Settings(BaseSettings):
+    """Application settings for SupportAgent API."""
     
     openai_api_key: str = 'your-default-api-key'
     openai_model: str = 'gpt-3.5-turbo'
@@ -36,6 +39,8 @@ class Settings(BaseSettings):
     
     @property
     def database_url(self) -> str:
+        """Construct the database URL for PostgreSQL with pgvector support."""
+        
         return f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
     
     model_config = SettingsConfigDict(

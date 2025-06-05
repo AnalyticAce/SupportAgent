@@ -1,4 +1,3 @@
-import asyncio
 from fastapi import APIRouter, HTTPException
 from app.agent import support_agent, SupportDependencies, generate_embedding
 from app.database import DataconnectionFaq, DataconnectionUser
@@ -11,42 +10,31 @@ from app.models import (
 
 faq_router = APIRouter(
     prefix="/faq",
-    tags=["FAQ"]
+    tags=["FAQ"],
+    responses={404: {"description": "FAQ not found"}}
 )
 
 
 agent_router = APIRouter(
     prefix="/agent",
-    tags=["Support Agent"]
+    tags=["Support Agent"],
+    responses={500: {"description": "Internal server error"}}
 )
 
 
-@agent_router.post("/query", response_model=QueryResponse)
+@agent_router.post(
+    "/query", 
+    response_model=QueryResponse,
+    summary="Process Customer Support Query",
+    description="Submit a customer support query to the AI agent for intelligent response generation",
+    responses={
+        200: {"description": "Successful query processing with AI response"},
+        500: {"description": "Error processing query"}
+    }
+)
 async def query_support_agent(request: QueryRequest):
     """
-🤖 **AI-Powered Support Query with RAG**
-
-Submit a customer support query to the intelligent AI agent and receive a structured response 
-with personalized advice, escalation recommendations, and risk assessment.
-
-**Features:**
-- **RAG Implementation**: Uses semantic search through vectorized FAQ database
-- **Account-Aware**: Automatically checks user account status and subscription
-- **Smart Escalation**: AI determines when human intervention is needed
-- **Risk Scoring**: Provides 0-10 risk level for prioritization
-- **Personalized**: Tailors responses based on user subscription tier
-
-**Example Queries:**
-- "What is your refund policy?"
-- "I can't access my account"
-- "How do I upgrade my subscription?"
-- "The application keeps crashing"
-
-**Response includes:**
-- Intelligent support advice using RAG
-- Boolean escalation recommendation
-- Risk level scoring (0=low, 10=critical)
-- Original query and user ID for tracking
+Process a customer support query using AI agent with RAG capabilities.
     """
     try:
         deps = SupportDependencies(
@@ -72,8 +60,20 @@ with personalized advice, escalation recommendations, and risk assessment.
         raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
 
 
-@faq_router.get("/", response_model=dict)
+@faq_router.get(
+    "/", 
+    response_model=dict,
+    summary="Get All FAQs",
+    description="Retrieve all FAQ entries from the database with questions, answers, and categories",
+    responses={
+        200: {"description": "List of all FAQs retrieved successfully"},
+        404: {"description": "No FAQs found in database"}
+    }
+)
 async def get_faqs():
+    """
+Retrieve all FAQ entries from the database.
+    """
     try:
         faqs = await DataconnectionFaq.get_faqs()
         
@@ -85,8 +85,20 @@ async def get_faqs():
         raise HTTPException(status_code=500, detail=f"Error retrieving FAQs: {str(e)}")
 
 
-@faq_router.get("/{category}")
+@faq_router.get(
+    "/{category}", 
+    response_model=dict,
+    summary="Get FAQs by Category",
+    description="Retrieve FAQ entries filtered by specific category",
+    responses={
+        200: {"description": "FAQs for category retrieved successfully"},
+        404: {"description": "No FAQs found for the specified category"}
+    }
+)
 async def get_faq_by_category(category: str):
+    """
+Retrieve FAQ entries filtered by category.
+    """
     try:
         faqs = await DataconnectionFaq.get_faq_by_category(category)
         
@@ -98,8 +110,20 @@ async def get_faq_by_category(category: str):
         raise HTTPException(status_code=500, detail=f"Error retrieving FAQs for category '{category}': {str(e)}")
 
 
-@faq_router.post("/", response_model=FaqCreateRequest)
+@faq_router.post(
+    "/", 
+    response_model=FaqCreateRequest,
+    summary="Create New FAQ",
+    description="Add a new FAQ entry with automatic vector embedding generation",
+    responses={
+        200: {"description": "FAQ created successfully"},
+        500: {"description": "Error creating FAQ entry"}
+    }
+)
 async def create_faq(faq: FaqCreateRequest):
+    """
+Create a new FAQ entry in the database.
+    """
     try:
         embedding = await generate_embedding(f"{faq.question}\n{faq.answer}")
         await DataconnectionFaq.add_faq(faq.question, faq.answer, faq.category, embedding)
@@ -112,8 +136,21 @@ async def create_faq(faq: FaqCreateRequest):
         raise HTTPException(status_code=500, detail=f"Error creating FAQ: {str(e)}")
 
 
-@faq_router.put("/{faq_id}", response_model=FaqCreateRequest)
+@faq_router.put(
+    "/{faq_id}", 
+    response_model=FaqCreateRequest,
+    summary="Update FAQ Entry",
+    description="Update an existing FAQ entry by ID with new content",
+    responses={
+        200: {"description": "FAQ updated successfully"},
+        404: {"description": "FAQ with specified ID not found"},
+        500: {"description": "Error updating FAQ entry"}
+    }
+)
 async def update_faq(faq_id: int, faq: FaqCreateRequest):
+    """
+Update an existing FAQ entry by ID.
+    """
     try:
         updated_faq = await DataconnectionFaq.update_faq(faq_id, faq.question, faq.answer, faq.category)
         if not updated_faq:
@@ -123,8 +160,21 @@ async def update_faq(faq_id: int, faq: FaqCreateRequest):
         raise HTTPException(status_code=500, detail=f"Error updating FAQ: {str(e)}")
 
 
-@faq_router.delete("/{faq_id}")
+@faq_router.delete(
+    "/{faq_id}", 
+    response_model=dict,
+    summary="Delete FAQ Entry", 
+    description="Remove an FAQ entry from the database by ID",
+    responses={
+        200: {"description": "FAQ deleted successfully"},
+        404: {"description": "FAQ with specified ID not found"},
+        500: {"description": "Error deleting FAQ entry"}
+    }
+)
 async def delete_faq(faq_id: int):
+    """
+Delete an FAQ entry by ID.
+    """
     try:
         result = await DataconnectionFaq.delete_faq(faq_id)
         if "message" in result:
